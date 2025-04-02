@@ -1,4 +1,5 @@
-name: Deploy Website to Apache Server
+name: Deploy Website to Apache Server 
+
 on:
   push:
     branches:
