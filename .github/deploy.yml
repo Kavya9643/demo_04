@@ -1,16 +1,17 @@
-name: Deploy Website to Apache Server 
+name: Deploy Website to Apache Server
 
 on:
   push:
     branches:
-      - main  # Runs the workflow when code is pushed to the main branch
+      - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3  # Pulls the latest code from GitHub
+        uses: actions/checkout@v3
 
       - name: Set Up SSH Connection
         run: |
@@ -19,10 +20,15 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
+      - name: Debug Server Connectivity
+        run: |
+          ping -c 4 ${{ secrets.SERVER_IP }}
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo 'SSH connection successful'"
+
       - name: Deploy Website Files
         run: |
           scp -r * ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/var/www/html/
 
       - name: Restart Apache Server
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "sudo systemctl restart  apache2"
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "sudo systemctl restart apache2"
